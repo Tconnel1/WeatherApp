@@ -26,7 +26,7 @@ public class WeatherService {
     private final RestTemplate restTemplate;
 
     /**
-     * returns a response with the hottest day of the week. If multiple days share the same temperature, it will return the most humid day
+     * returns a response with the hottest day of the week. If multiple days share the same temperature, it will return the least humid day
      * @param lat is the latitude of the location being recorded
      * @param lon is the longitude of the lacation being recorded
      * @return a weatherResponse containing the warmest day
@@ -40,7 +40,7 @@ public class WeatherService {
                 List<Daily> warmestDays = getWarmestDays(weeklyForecast);
 
                 if (warmestDays.size() > 1) {
-                    getMostHumidDay(weatherResponse, warmestDays);
+                    getLeastHumidDay(weatherResponse, warmestDays);
                 } else {
                     weatherResponse.setMaxTemp(warmestDays.get(0));
                 }
@@ -74,16 +74,16 @@ public class WeatherService {
     }
 
     /**
-     * finds the most humid day in a list of hottest days
+     * finds the least humid day in a list of hottest days
      * @param weatherResponse response that is returned to the user containing the warmest day
      * @param warmestDays list of warmest days
      */
-    private void getMostHumidDay(WeatherResponse weatherResponse, List<Daily> warmestDays) {
+    private void getLeastHumidDay(WeatherResponse weatherResponse, List<Daily> warmestDays) {
         warmestDays.stream()
-                .filter(daily -> daily.getHumidity() <= warmestDays.stream()
+                .filter(daily -> daily.getHumidity().equals(warmestDays.stream()
                         .map(Daily::getHumidity)
                         .max(Comparator.comparing(Long::longValue))
-                        .get()).findAny().ifPresent(weatherResponse::setMaxTemp);
+                        .get())).findAny().ifPresent(weatherResponse::setMaxTemp);
     }
 
     private String urlBuilder(String latitude, String longitude) {
